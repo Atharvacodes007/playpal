@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <link rel="icon" href="images/favicon.png">
+    <title>PlayPal - Preview</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="preview-container">
+
+    <!-- LEFT: CAMERA PREVIEW -->
+    <div class="preview-video glass-panel">
+        <video id="previewVideo" autoplay playsinline muted></video>
+
+        <div class="preview-controls">
+            <button id="camBtn" onclick="toggleCam()">📷</button>
+            <button id="micBtn" onclick="toggleMic()">🎤</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: RULES + JOIN -->
+    <div class="preview-info glass-panel">
+
+        <h2>Before You Join</h2>
+
+        <ul class="rules">
+            <li>🎧 Use headphones for better experience</li>
+            <li>📶 Stable internet required</li>
+            <li>👤 Use a unique username</li>
+            <li>🎥 Respect others in video call</li>
+            <li>🚫 Don’t spam chat</li>
+        </ul>
+
+        <button class="join-btn" onclick="enterRoom()">Join Room 🚀</button>
+
+    </div>
+
+</div>
+
+<script>
+let stream;
+let camOn = true;
+let micOn = true;
+
+// GET PARAMS
+const params = new URLSearchParams(window.location.search);
+const room = params.get("room");
+const user = params.get("user");
+const pass = params.get("pass");
+
+// START CAMERA
+async function startPreview(){
+    try{
+        stream = await navigator.mediaDevices.getUserMedia({
+            video:true,
+            audio:true
+        });
+
+        document.getElementById("previewVideo").srcObject = stream;
+
+    }catch(err){
+        alert("Camera/Mic access required!");
+    }
+}
+
+startPreview();
+
+// TOGGLE CAMERA
+function toggleCam(){
+    const track = stream.getVideoTracks()[0];
+    track.enabled = !track.enabled;
+    camOn = track.enabled;
+
+    document.getElementById("camBtn").innerText = camOn ? "📷" : "🚫";
+}
+
+// TOGGLE MIC
+function toggleMic(){
+    const track = stream.getAudioTracks()[0];
+    track.enabled = !track.enabled;
+    micOn = track.enabled;
+
+    document.getElementById("micBtn").innerText = micOn ? "🎤" : "🔇";
+}
+
+// ENTER ROOM
+function enterRoom(){
+    window.location.href =
+        `room.html?room=${room}&user=${user}&pass=${pass}&cam=${camOn}&mic=${micOn}`;
+}
+</script>
+
+</body>
+</html>

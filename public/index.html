@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="images/favicon.png">
+    <title>PlayPal</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="home-wrapper">
+<div class="home-box glass-panel">
+
+<div class="logo">
+    <span class="play-icon"></span> <span class="logo-text">PlayPal</span>
+</div>
+        <!-- TABS -->
+        <div class="home-tabs">
+            <button id="createTab" class="active" onclick="showCreate()">Create</button>
+            <button id="joinTab" onclick="showJoin()">Join</button>
+        </div>
+
+        <!-- CREATE -->
+        <div id="createBox">
+            <input id="adminName" placeholder="Host Username">
+            <input id="createRoomId" placeholder="Room ID">
+            <input id="roomSize" placeholder="Room Size">
+            <input id="roomPass" placeholder="Password" type="password">
+
+            <button onclick="createRoom()">Create Room</button>
+            <div class="steps">
+    <p><b>Steps:</b></p>
+    <p>1. Enter your username</p>
+    <p>2. Create a Room ID</p>
+    <p>3. Set room size(max size 6) & password</p>
+    <p>4. Click Create Room</p>
+    <p>5. Share Room ID & Password</p>
+</div>
+<a href="https://www.youtube.com" target="_blank">
+    <button type="button">Get YouTube Video</button>
+</a>
+        </div>
+
+        <!-- JOIN -->
+        <div id="joinBox" style="display:none;">
+            <input id="userName" placeholder="Guest Username">
+            <input id="joinRoomId" placeholder="Room ID">
+            <input id="joinPass" placeholder="Password" type="password">
+
+            <button onclick="joinRoom()">Join Room</button>
+            <div class="steps">
+    <p><b>Steps:</b></p>
+    <p>1. Enter your username</p>
+    <p>2. Enter Room ID</p>
+    <p>3. Enter password</p>
+    <p>4. Click Join Room</p>
+</div>
+          
+        </div>
+
+    </div>
+
+</div>
+<div id="popupContainer"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+// TAB SWITCH
+function showCreate() {
+    document.getElementById("createBox").style.display = "block";
+    document.getElementById("joinBox").style.display = "none";
+
+    document.getElementById("createTab").classList.add("active");
+    document.getElementById("joinTab").classList.remove("active");
+}
+
+function showJoin() {
+    document.getElementById("createBox").style.display = "none";
+    document.getElementById("joinBox").style.display = "block";
+
+    document.getElementById("joinTab").classList.add("active");
+    document.getElementById("createTab").classList.remove("active");
+}
+
+// CREATE ROOM
+function createRoom() {
+    const admin = document.getElementById("adminName").value.trim();
+    const roomId = document.getElementById("createRoomId").value.trim();
+    const size = document.getElementById("roomSize").value.trim();
+    const pass = document.getElementById("roomPass").value.trim();
+
+    if (!admin || !roomId || !size || !pass) {
+        showPopup("❌ Fill all fields", "error");  // <-- replaced alert
+        return;
+    }
+
+    socket.emit("create-room", {
+        roomId,
+        admin,
+        password: pass,
+        size
+    });
+}
+// REDIRECT
+socket.on("room-created", (roomId) => {
+    const admin = document.getElementById("adminName").value.trim();
+    const pass = document.getElementById("roomPass").value.trim();
+    
+    showPopup("✅ Room created successfully!", "success");  // optional
+   window.location.href = `preview.html?room=${roomId}&user=${admin}&pass=${pass}`;
+});
+function joinRoom() {
+    const user = document.getElementById("userName").value.trim();
+    const roomId = document.getElementById("joinRoomId").value.trim();
+    const pass = document.getElementById("joinPass").value.trim();
+
+    if (!user || !roomId || !pass) {
+        showPopup("❌ Fill all fields", "error");
+        return;
+    }
+
+    // Emit join-room event to server
+    socket.emit("join-room", {
+        user,
+        roomId,
+        password: pass
+    });
+}
+
+socket.on("room-joined", ({ roomId, user, password }) => {
+    showPopup("✅ Joined room successfully!", "success");
+    // Redirect after a short delay so popup is visible
+    setTimeout(() => {
+        window.location.href = `preview.html?room=${roomId}&user=${user}&pass=${password}`;
+    }, 500);
+});
+
+// Server errors already handled here
+socket.on("error-msg", (msg) => {
+    showPopup("⚠️ " + msg, "warning");
+});
+</script>
+<!-- POPUP CONTAINER -->
+<div id="popupContainer" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;"></div>
+<script>
+    // ===== POPUP FUNCTION =====
+    function showPopup(message, type = "info", duration = 3000) {
+        const container = document.getElementById("popupContainer");
+        const popup = document.createElement("div");
+        popup.classList.add("popup");
+
+        // Border color based on type
+        if(type === "success") popup.style.borderLeft = "5px solid green";
+        else if(type === "error") popup.style.borderLeft = "5px solid red";
+        else if(type === "warning") popup.style.borderLeft = "5px solid orange";
+        else popup.style.borderLeft = "5px solid blue";
+
+        popup.innerText = message;
+        container.appendChild(popup);
+
+        // Auto-remove after duration
+        setTimeout(() => popup.remove(), duration);
+    }
+
+    // Replace alert() calls with showPopup
+    function showAlertMessage(msg, type="info") {
+        showPopup(msg, type);
+    }
+</script>
+
+<style>
+    /* ===== POPUP CSS ===== */
+    #popupContainer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .popup {
+        background: #0f172a;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-top: 10px;
+        min-width: 250px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+</style>
+
+</body>
+</html>

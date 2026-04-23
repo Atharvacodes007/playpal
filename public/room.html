@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="images/favicon.png">
+    <title>PlayPal</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div class="main-container">
+
+  <div class="video-section glass-panel">
+
+    <button class="toggle-panel" onclick="togglePanel()">☰</button>
+
+    <button class="leave-room-btn" onclick="leaveRoom()">
+        🚪 Leave Room
+    </button>
+
+    <div class="logo">
+        <span class="play-icon">▶</span>
+        PlayPal
+    </div>
+
+    <!-- VIDEO PLAYER -->
+    <div class="player-wrapper">
+
+    <div id="player"></div>
+
+    <!-- 🔥 PLAYPAL OVERLAY -->
+    <div id="playOverlay" onclick="startVideo()">
+        <div class="playpal-btn"></div>
+    </div>
+
+</div>
+
+    <!-- CONTROLS -->
+    <div class="controls glass-panel">
+        <input id="videoId" placeholder="Paste YouTube Link">
+        <button onclick="loadVideo()">Load</button>
+    </div>
+    <!-- VIDEO CALL FLOATING -->
+   <div class="video-call-section glass-panel">
+
+        <div class="video-call-title">🎥 Video Call</div>
+
+        <div class="video-grid" id="videoGrid"></div>
+          <!-- CALL CONTROLS -->
+
+    </div>
+</div>
+
+<div class="resize-bar"></div>
+    <!-- RIGHT PANEL -->
+   <div class="chat-section glass-panel">
+        <!-- TABS -->
+        <div class="tabs">
+            <button onclick="showTab('chat')">Chat</button>
+            <button onclick="showTab('users')">Users</button>
+            <button onclick="showTab('info')">Info</button>
+        </div>
+
+        <!-- USERS -->
+        <div id="usersTab" class="tab-content" style="display:none;">
+            <div id="users" class="glass-panel" style="padding:10px;"></div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chatTab" class="tab-content">
+            <div class="chat-header">Chat</div>
+
+           <div id="chatBox" class="chat-box glass-panel"></div>
+               <div id="replyBox" style="display:none; padding:6px; font-size:12px; background:#111;"></div>
+            <div class="chat-input">
+
+                <button onclick="toggleEmoji()">😊</button>
+
+                   <div id="emojiBox" >
+                   <span>😀</span>
+                   <span>😁</span>
+                   <span>😂</span>
+                   <span>🤣</span>
+                   <span>😍</span>
+                   <span>😎</span>
+                   <span>😢</span>
+                    <span>😡</span>
+                      <span>👍</span>
+                       <span>👎</span>
+                     <span>❤️</span>
+                    <span>🔥</span>
+                   <span>🎉</span>
+                  </div>
+
+                <input id="msg" placeholder="Type message..." onkeydown="handleEnter(event)">
+                <button onclick="sendMsg()">Send</button>
+
+            </div>
+        </div>
+
+        <!-- INFO -->
+         <div id="infoTab" class="tab-content glass-panel" style="display:none; padding:15px;">
+            <h3>Room Details</h3>
+            <p><b>Room ID:</b> <span id="roomIdText"></span></p>
+            <p><b>Password:</b> <span id="roomPassText"></span></p>
+            <p><b>Room Size:</b> <span id="roomSizeText"></span></p>
+
+            <button id="shareBtn" onclick="openInvite()">Share Room</button>
+        </div>
+
+    </div>
+
+    <div id="invitePopup" class="invite-popup">
+    <h3>Share PlayPal Room</h3>
+
+    <button onclick="shareWhatsApp()">🟢 WhatsApp</button>
+    <button onclick="shareTelegram()">🔵 Telegram</button>
+    <button onclick="shareX()">🐦 X</button>
+    <button onclick="shareInstagram()">Instagram</button>
+    <button onclick="shareReddit()">Reddit</button>
+    <button onclick="shareGmail()">Gmail</button>
+    <button onclick="copyInvite()">📋 Copy Invite</button>
+
+    <br><br>
+    <button onclick="closeInvite()">Close</button>
+</div>
+
+</div>
+
+
+<div id="popupContainer" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999;"></div>
+
+<!-- SOUND -->
+<audio id="notifSound">
+    <source src="https://www.soundjay.com/buttons/sounds/button-3.mp3">
+</audio>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+function showTab(tab) {
+
+    document.getElementById("chatTab").style.display = "none";
+    document.getElementById("usersTab").style.display = "none";
+    document.getElementById("infoTab").style.display = "none";
+
+    document.getElementById(tab + "Tab").style.display = "flex";
+
+    if(tab === "chat"){
+        const chatBox = document.getElementById("chatBox");
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+</script>
+
+</body>
+</html>
+
