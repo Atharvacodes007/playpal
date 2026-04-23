@@ -163,7 +163,14 @@ db.query(
     [roomId],
     (err, messages) => {
         if (!err) {
-            socket.emit("chat-history", messages);
+            const formatted = messages.map(m => ({
+    id: m.id,
+    sender: m.username,
+    msg: m.message,
+    reply: null
+}));
+
+socket.emit("chat-history", formatted);
         }
     }
 );
