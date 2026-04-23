@@ -1,15 +1,10 @@
 const mysql = require("mysql2");
 
-const db = mysql.createConnection({
-  uri: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+const db = mysql.createConnection(process.env.DATABASE_URL);
 
 db.connect((err) => {
   if (err) {
-    console.log("DB load error:", err);
+    console.error("❌ DB connection error:", err);
   } else {
     console.log("✅ Database connected");
   }
