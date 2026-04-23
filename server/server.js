@@ -344,18 +344,25 @@ io.to(socket.roomId).emit("chat", {
     sender: "SYSTEM"
 }); 
 if (room.users.length === 0) { 
-    delete rooms[socket.roomId]; 
-    console.log("Room deleted (memory):", socket.roomId); 
+    const roomId = socket.roomId;
 
-    // 🔥 DELETE FROM DATABASE
+    delete rooms[roomId]; 
+    console.log("Room deleted (memory):", roomId); 
+
+    // 🔥 DELETE ALL RELATED DATA FIRST
+    db.query("DELETE FROM room_messages WHERE room_id = ?", [roomId]);
+    db.query("DELETE FROM room_users WHERE room_id = ?", [roomId]);
+    db.query("DELETE FROM room_videos WHERE room_id = ?", [roomId]);
+
+    // 🔥 THEN DELETE ROOM
     db.query(
         "DELETE FROM rooms WHERE id = ?", 
-        [socket.roomId], 
+        [roomId], 
         (err) => {
             if (err) {
                 console.error("DB delete error:", err);
             } else {
-                console.log("Room deleted from DB:", socket.roomId);
+                console.log("Room deleted from DB:", roomId);
             }
         }
     );
