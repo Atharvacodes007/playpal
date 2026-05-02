@@ -293,6 +293,10 @@ socket.on("chat", (data) => {
     if (!data.id) data.id = Date.now(); // safety
 
     room.chat.push(data);
+
+if(room.chat.length > 200){
+   room.chat.shift();
+}
     // 🔥 SAVE CHAT TO DB
 db.query(
     "INSERT INTO room_messages (room_id, username, message) VALUES (?, ?, ?)",

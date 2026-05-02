@@ -739,7 +739,7 @@ function sendMsg() {
     if (!input.value.trim()) return;
 
     socket.emit("chat", {
-            id: Date.now(),     // ✅ ADD THIS
+            id: Date.now() + Math.floor(Math.random()*1000),     // ✅ ADD THIS
         msg: input.value,
         sender: username,
         reply: replyingTo   // ✅ include reply
@@ -825,6 +825,9 @@ if (data.sender === username) {
 }
 
     chatBox.appendChild(div); 
+    while(chatBox.children.length > 100){
+   chatBox.removeChild(chatBox.firstChild);
+}
 
     // smooth scroll (better)
     chatBox.scrollTo({
