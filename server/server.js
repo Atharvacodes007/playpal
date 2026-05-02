@@ -234,7 +234,20 @@ socket.on("play", (data) => {
         state: "playing"
     };
 
+
     // ✅ DB SAVE (keep your existing query if you want)
+    db.query(
+  `INSERT INTO room_videos (room_id, video_id, time, state)
+   VALUES (?, ?, ?, ?)
+   ON DUPLICATE KEY UPDATE
+   video_id = VALUES(video_id),
+   time = VALUES(time),
+   state = VALUES(state)`,
+  [socket.roomId, data.videoId, data.time, "playing"],
+  (err) => {
+    if (err) console.error("Video save error:", err);
+  }
+);
 
     // ✅ SEND CORRECT EVENT
     socket.to(socket.roomId).emit("play", {
@@ -249,6 +262,10 @@ socket.on("pause", () => {
     if (socket.username !== room.admin) return;
 
     room.video.state = "paused";
+    db.query(
+  "UPDATE room_videos SET state='paused', time=? WHERE room_id=?",
+  [room.video.time, socket.roomId]
+);
 
     socket.to(socket.roomId).emit("sync-state", {
         videoId: room.video.videoId,
@@ -263,6 +280,10 @@ socket.on("video-ended", () => {
     if (socket.username !== room.admin) return;
 
     room.video.state = "ended";
+    db.query(
+  "UPDATE room_videos SET state='ended', time=0 WHERE room_id=?",
+  [socket.roomId]
+);
 
     socket.to(socket.roomId).emit("sync-state", {
         videoId: room.video.videoId,
